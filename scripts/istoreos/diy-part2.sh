@@ -9,12 +9,8 @@
 # File name: diy-part2.sh
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
-# 添加官方 Packages 作为独立 Feed
-echo "src-git rust_packages https://github.com/openwrt/packages.git" >> feeds.conf
-# 更新并安装 Rust 支持
-./scripts/feeds update rust_packages
-./scripts/feeds install -p rust_packages lang/rust
-
+# 调试rust
+ls -al feeds/packages/lang/rust
 # 更新Go语言版本go1.23
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/kenzok8/golang -b 1.23 feeds/packages/lang/golang
