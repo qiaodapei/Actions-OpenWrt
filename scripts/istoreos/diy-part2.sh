@@ -496,18 +496,65 @@ CONFIG_VMDK_IMAGES=y
 " >> .config
 # 添加Passwall插件
 echo "
+# ========== Passwall 主程序 ==========
 CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Transparent_Proxy=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_IPv6_Nat=y
+
+# ========== 协议支持 ==========
+# Xray 核心
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray_plugin=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray-core=y
+
+# Trojan 系列
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
+
+# 其他协议
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Kcptun=y
+
+# ========== 工具链依赖 ==========
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ChinaDNS_NG=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Dns2socks=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple-obfs=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray-plugin=y
+
+# ========== 系统级依赖 ==========
+CONFIG_PACKAGE_dnsmasq-full=y
+CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
+CONFIG_PACKAGE_iptables-mod-iprange=y
+CONFIG_PACKAGE_iptables-mod-socket=y
+CONFIG_PACKAGE_kmod-inet-diag=y
+CONFIG_PACKAGE_kmod-nft-tproxy=y
+CONFIG_PACKAGE_libustream-openssl=y
+CONFIG_PACKAGE_openssl-util=y
+
+# ========== 透明代理优化 ==========
+CONFIG_PACKAGE_ip-full=y
+CONFIG_PACKAGE_iptables-nft=y
+CONFIG_IPTABLES_NFTABLES=y
+CONFIG_IPV6=y
+
+# ========== 可选组件 ==========
+# 流量分载 (需内核支持)
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Server=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Server=y
+# CONFIG_PACKAGE_luci-app-passwall=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Kcptun=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ChinaDNS_NG=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Dns2socks=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple-obfs=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray-plugin=y
 " >> .config
 
 # 添加设备
