@@ -22,16 +22,5 @@
 # echo 'src-git mosdns https://github.com/sbwml/luci-app-mosdns' >>feeds.conf.default
 # echo 'src-git kiddin9 https://github.com/kiddin9/kwrt-packages' >>feeds.conf
 # # 添加 Passwall2 的软件源到 feeds 列表
-# echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main' >> feeds.conf.default
-# echo 'src-git kenzo https://github.com/kenzok8/openwrt-packages.git' >> feeds.conf.default
-
-# 添加安装Rust语言
-pwd
-git clone https://github.com/openwrt/packages.git feeds/openwrt-packages
-pwd
-ls -al ./
-ls -al feeds/openwrt-packages/lang/rust
-cp -r feeds/openwrt-packages/lang/rust feeds/packages/lang/
-echo "feeds/packages/lang/"
-ls -al feeds/packages/lang/
-
+echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main' >> feeds.conf.default
+echo 'src-git kenzo https://github.com/kenzok8/openwrt-packages.git' >> feeds.conf.default
