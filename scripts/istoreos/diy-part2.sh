@@ -13,6 +13,7 @@
 # 更新Go语言版本go1.23
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/kenzok8/golang -b 1.23 feeds/packages/lang/golang
+./scripts/feeds install -a
 
 # 修改openwrt登陆地址,把下面的 192.168.10.1 修改成你想要的就可以了
 # sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
