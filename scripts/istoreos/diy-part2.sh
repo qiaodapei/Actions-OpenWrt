@@ -9,12 +9,16 @@
 # File name: diy-part2.sh
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
-
+# 添加官方 Packages 作为独立 Feed
+echo "src-git rust_packages https://github.com/openwrt/packages.git" >> feeds.conf
+# 更新并安装 Rust 支持
+./scripts/feeds update rust_packages
+./scripts/feeds install -p rust_packages lang/rust
 
 # 更新Go语言版本go1.23
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/kenzok8/golang -b 1.23 feeds/packages/lang/golang
-./scripts/feeds install -a
+./scripts/feeds install -p packages lang/golang
 
 # 修改openwrt登陆地址,把下面的 192.168.10.1 修改成你想要的就可以了
 # sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
@@ -500,68 +504,72 @@ CONFIG_GRUB_IMAGES=y
 CONFIG_VMDK_IMAGES=y
 " >> .config
 
-# # 添加Passwall插件
-# echo "
-# # ========== Passwall 主程序 ==========
-# CONFIG_PACKAGE_luci-app-passwall=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Transparent_Proxy=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_IPv6_Nat=y
+# 添加Passwall插件
+echo "
+# 启用 Rust 工具链
+echo "CONFIG_PACKAGE_rust=y" >> .config
+echo "CONFIG_PACKAGE_rustc=y" >> .config
 
-# # ========== 协议支持 ==========
-# # Xray 核心
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray_plugin=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray-core=y
+# ========== Passwall 主程序 ==========
+CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Transparent_Proxy=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_IPv6_Nat=y
 
-# # Trojan 系列
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
+# ========== 协议支持 ==========
+# Xray 核心
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray_plugin=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray-core=y
 
-# # 其他协议
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Kcptun=y
+# Trojan 系列
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
 
-# # ========== 工具链依赖 ==========
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ChinaDNS_NG=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Dns2socks=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple-obfs=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray-plugin=y
+# 其他协议
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Kcptun=y
 
-# # ========== 系统级依赖 ==========
-# CONFIG_PACKAGE_dnsmasq-full=y
-# CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
-# CONFIG_PACKAGE_iptables-mod-iprange=y
-# CONFIG_PACKAGE_iptables-mod-socket=y
-# CONFIG_PACKAGE_kmod-inet-diag=y
-# CONFIG_PACKAGE_kmod-nft-tproxy=y
-# CONFIG_PACKAGE_libustream-openssl=y
-# CONFIG_PACKAGE_openssl-util=y
+# ========== 工具链依赖 ==========
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ChinaDNS_NG=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Dns2socks=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple-obfs=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray-plugin=y
 
-# # ========== 透明代理优化 ==========
-# CONFIG_PACKAGE_ip-full=y
-# CONFIG_PACKAGE_iptables-nft=y
-# CONFIG_IPTABLES_NFTABLES=y
-# CONFIG_IPV6=y
+# ========== 系统级依赖 ==========
+CONFIG_PACKAGE_dnsmasq-full=y
+CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
+CONFIG_PACKAGE_iptables-mod-iprange=y
+CONFIG_PACKAGE_iptables-mod-socket=y
+CONFIG_PACKAGE_kmod-inet-diag=y
+CONFIG_PACKAGE_kmod-nft-tproxy=y
+CONFIG_PACKAGE_libustream-openssl=y
+CONFIG_PACKAGE_openssl-util=y
 
-# # ========== 可选组件 ==========
-# # 流量分载 (需内核支持)
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Server=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Server=y
-# # CONFIG_PACKAGE_luci-app-passwall=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Kcptun=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ChinaDNS_NG=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Dns2socks=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple-obfs=y
-# # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray-plugin=y
-# " >> .config
+# ========== 透明代理优化 ==========
+CONFIG_PACKAGE_ip-full=y
+CONFIG_PACKAGE_iptables-nft=y
+CONFIG_IPTABLES_NFTABLES=y
+CONFIG_IPV6=y
+
+# ========== 可选组件 ==========
+# 流量分载 (需内核支持)
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Server=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Server=y
+CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Kcptun=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ChinaDNS_NG=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Dns2socks=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple-obfs=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray-plugin=y
+" >> .config
 
 # 添加设备
 if [ "$1" = "rk33xx" ]; then
