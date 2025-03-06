@@ -10,6 +10,7 @@
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
 
+
 # 更新Go语言版本go1.23
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/kenzok8/golang -b 1.23 feeds/packages/lang/golang
@@ -99,6 +100,7 @@ mkdir MyConfig
 pushd MyConfig
 git clone --depth=1 https://github.com/qiaodapei/OpenWRT-MyConfig .
 popd
+
 
 mkdir package/community
 pushd package/community
