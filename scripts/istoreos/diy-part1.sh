@@ -32,3 +32,6 @@ pwd
 ls -al ./
 ls -al feeds/openwrt-packages/lang/rust
 cp -r feeds/openwrt-packages/lang/rust feeds/packages/lang/
+echo "feeds/packages/lang/"
+ls -al feeds/packages/lang/
+
