@@ -29,6 +29,5 @@
 pwd
 git clone https://github.com/openwrt/packages.git feeds/openwrt-packages
 pwd
-ls -al ../../feeds/
-cp -r ../../feeds/openwrt-packages/lang/rust ../../feeds/packages/lang/rust
-ls -al ../../feeds/packages/lang/rust
+ls -al ./
+# cp -r ../../feeds/openwrt-packages/lang/rust ../../feeds/packages/lang/rust
