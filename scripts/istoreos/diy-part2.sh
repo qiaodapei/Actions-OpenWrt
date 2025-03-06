@@ -507,8 +507,8 @@ CONFIG_VMDK_IMAGES=y
 # 添加Passwall插件
 echo "
 # 启用 Rust 工具链
-echo "CONFIG_PACKAGE_rust=y" >> .config
-echo "CONFIG_PACKAGE_rustc=y" >> .config
+CONFIG_PACKAGE_rust=y
+CONFIG_PACKAGE_rustc=y
 
 # ========== Passwall 主程序 ==========
 CONFIG_PACKAGE_luci-app-passwall=y
