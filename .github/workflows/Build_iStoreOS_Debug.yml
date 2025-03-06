@@ -263,20 +263,10 @@ jobs:
           exit 1
         fi
         make defconfig
-        make download -j$(nproc) || {
-          echo "::warning::⚠️ 并行编译失败，尝试单线程编译...";
-          make download -j$(nproc) V=s || {
-            echo "::error::❌ 严重错误：编译最终失败，请检查以下可能原因：
-            1. 软件包依赖不满足
-            2. 配置文件存在冲突
-            3. 系统资源不足";
-            # exit 1;
-          }
+        make download -j$(nproc) V=s || {
+          echo "::error::❌ 软件包下载失败";
+          exit 1;
         }
-        # make download -j8 || {
-        #   echo "::error::❌ 软件包下载失败";
-        #   exit 1;
-        # }
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
@@ -294,7 +284,7 @@ jobs:
             1. 软件包依赖不满足
             2. 配置文件存在冲突
             3. 系统资源不足";
-            # exit 1;
+            exit 1;
           }
         }
         echo "status=success" >> $GITHUB_OUTPUT
