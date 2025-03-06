@@ -171,8 +171,6 @@ cp -rf ../../kiddin9/luci-app-rtbwmon/* luci-app-rtbwmon
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages
 
-# 动态删除所有 toolchain 指令行
-sed -i '/^toolchain go/d' openwrt-passwall-packages/geoview/go.mod
 
 #VSSR（Hello Word）
 # svn export https://github.com/jerrykuku/lua-maxminddb/trunk lua-maxminddb
