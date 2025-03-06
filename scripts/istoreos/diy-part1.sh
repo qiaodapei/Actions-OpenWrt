@@ -24,3 +24,7 @@
 # # 添加 Passwall2 的软件源到 feeds 列表
 # echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main' >> feeds.conf.default
 # echo 'src-git kenzo https://github.com/kenzok8/openwrt-packages.git' >> feeds.conf.default
+
+# 添加安装Rust语言
+git clone https://github.com/openwrt/packages.git feeds/openwrt-packages
+cp -r feeds/openwrt-packages/lang/rust feeds/packages/lang/rust
