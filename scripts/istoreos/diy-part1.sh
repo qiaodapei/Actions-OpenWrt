@@ -31,4 +31,4 @@ git clone https://github.com/openwrt/packages.git feeds/openwrt-packages
 pwd
 ls -al ./
 ls -al feeds/openwrt-packages/lang/rust
-cp -r feeds/openwrt-packages/lang/rust feeds/packages/lang/rust
+cp -r feeds/openwrt-packages/lang/rust feeds/packages/lang/
