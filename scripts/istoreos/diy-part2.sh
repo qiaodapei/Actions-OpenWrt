@@ -492,7 +492,7 @@ CONFIG_GRUB_IMAGES=y
 CONFIG_VMDK_IMAGES=y
 " >> .config
 
-echo "CONFIG_ALL_NONSHARED=n" > .config
+echo "CONFIG_ALL_NONSHARED=n" >> .config
 echo "CONFIG_ALL_KMODS=n" >> .config
 echo "CONFIG_ALL=n" >> .config
 echo "CONFIG_AUTOREMOVE=n" >> .config
