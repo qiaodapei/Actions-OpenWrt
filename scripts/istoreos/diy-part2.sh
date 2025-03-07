@@ -168,13 +168,9 @@ cp -rf ../../kiddin9/luci-app-rtbwmon/* luci-app-rtbwmon
 # cp -rf ../../kiddin9/v2ray-plugin/* v2ray-plugin
 # cp -rf ../../kiddin9/trojan/* trojan
 #Passwall和Passwall2
-git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall
-git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall2
-# 依赖组件（按需添加）
-git clone --depth=1 https://github.com/kenzok8/small-package
-cp -rf small-package/{dns2socks,microsocks,trojan} .
-rm -rf small-package
-
+# svn export https://github.com/xiaorouji/openwrt-passwall/trunk openwrt-passwall
+# svn export https://github.com/xiaorouji/openwrt-passwall/branches/luci/luci-app-passwall
+# svn export https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2
 #VSSR（Hello Word）
 # svn export https://github.com/jerrykuku/lua-maxminddb/trunk lua-maxminddb
 # svn export https://github.com/jerrykuku/luci-app-vssr/trunk luci-app-vssr
@@ -341,21 +337,6 @@ CONFIG_PACKAGE_luci-app-ssr-plus=y
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=n
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Server=n
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Trojan is not set
-
-# Passwall 核心配置
-CONFIG_PACKAGE_luci-app-passwall=y
-CONFIG_PACKAGE_luci-app-passwall_Transparent_Proxy=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Client=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Client=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
-
-# 必须的依赖项（根据仓库实际依赖调整）
-CONFIG_PACKAGE_dns2socks=y
-CONFIG_PACKAGE_microsocks=y
-CONFIG_PACKAGE_xray-core=y
-CONFIG_PACKAGE_trojan-go=y
-CONFIG_PACKAGE_libustream-openssl=y
 
 #Passwall和Passwall2
 # CONFIG_PACKAGE_luci-app-passwall2=y
