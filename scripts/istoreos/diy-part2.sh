@@ -9,6 +9,9 @@
 # File name: diy-part2.sh
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
+# 验证 Rust 工具链路径
+ls -al feeds/packages/lang/rust/
+
 
 # 修改openwrt登陆地址,把下面的 192.168.10.1 修改成你想要的就可以了
 # sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
