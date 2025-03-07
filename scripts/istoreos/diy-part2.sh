@@ -11,9 +11,9 @@
 #
 # 修正 Rust 工具链路径（关键步骤）
 # rm -rf feeds/packages/lang/rust
-git clone https://github.com/openwrt/packages.git -b master feeds_temp
-cp -rf feeds_temp/lang/rust feeds/packages/lang/
-rm -rf feeds_temp
+# git clone https://github.com/openwrt/packages.git -b master feeds_temp
+# cp -rf feeds_temp/lang/rust feeds/packages/lang/
+# rm -rf feeds_temp
 
 # 更新Golang
 rm -rf feeds/packages/lang/golang
