@@ -263,7 +263,7 @@ jobs:
           exit 1
         fi
         make defconfig
-        make download -j$(nproc) || {
+        make download -j1 V=s|| {
           echo "::error::❌ 软件包下载失败";
           exit 1;
         }
