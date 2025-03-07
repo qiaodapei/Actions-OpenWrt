@@ -9,10 +9,6 @@
 # File name: diy-part2.sh
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
-# 更新Go语言版本go1.23
-rm -rf feeds/packages/lang/golang
-git clone https://github.com/kenzok8/golang -b 1.23 feeds/packages/lang/golang
-./scripts/feeds install -p packages lang/golang
 
 # 修改openwrt登陆地址,把下面的 192.168.10.1 修改成你想要的就可以了
 # sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
@@ -99,7 +95,6 @@ pushd MyConfig
 git clone --depth=1 https://github.com/qiaodapei/OpenWRT-MyConfig .
 popd
 
-
 mkdir package/community
 pushd package/community
 
@@ -172,6 +167,13 @@ cp -rf ../../kiddin9/luci-app-rtbwmon/* luci-app-rtbwmon
 # cp -rf ../../kiddin9/simple-obfs/* simple-obfs
 # cp -rf ../../kiddin9/v2ray-plugin/* v2ray-plugin
 # cp -rf ../../kiddin9/trojan/* trojan
+#Passwall和Passwall2
+git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall
+git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall2
+# 依赖组件（按需添加）
+git clone --depth=1 https://github.com/kenzok8/small-package
+cp -rf small-package/{dns2socks,microsocks,trojan} .
+rm -rf small-package
 
 #VSSR（Hello Word）
 # svn export https://github.com/jerrykuku/lua-maxminddb/trunk lua-maxminddb
@@ -315,7 +317,7 @@ CONFIG_PACKAGE_luci-app-luci-app-rtbwmon=y
 
 # 科学上网和代理应用
 #SSR
-# CONFIG_PACKAGE_luci-app-ssr-plus=y
+CONFIG_PACKAGE_luci-app-ssr-plus=y
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_NONE_Client=y
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Libev_Client is not set
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client is not set
@@ -340,32 +342,47 @@ CONFIG_PACKAGE_luci-app-luci-app-rtbwmon=y
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Server=n
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Trojan is not set
 
-#Passwall和Passwall2
-CONFIG_PACKAGE_luci-app-passwall2=y
+# Passwall 核心配置
 CONFIG_PACKAGE_luci-app-passwall=y
 CONFIG_PACKAGE_luci-app-passwall_Transparent_Proxy=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ChinaDNS_NG=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Hysteria=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_IPv6_Nat=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Kcptun=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Client=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Server=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Client=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Server=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ShadowsocksR_Libev_Client=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ShadowsocksR_Libev_Server=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple_Obfs=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_SingBox=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Plugin=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray_Plugin=y
-CONFIG_PACKAGE_luci-app-haproxy-tcp=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
+
+# 必须的依赖项（根据仓库实际依赖调整）
+CONFIG_PACKAGE_dns2socks=y
+CONFIG_PACKAGE_microsocks=y
+CONFIG_PACKAGE_xray-core=y
+CONFIG_PACKAGE_trojan-go=y
+CONFIG_PACKAGE_libustream-openssl=y
+
+#Passwall和Passwall2
+# CONFIG_PACKAGE_luci-app-passwall2=y
+# CONFIG_PACKAGE_luci-app-passwall=y
+# CONFIG_PACKAGE_luci-app-passwall_Transparent_Proxy=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ChinaDNS_NG=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Hysteria=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_IPv6_Nat=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Kcptun=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Client=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Server=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Client=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Server=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ShadowsocksR_Libev_Client=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ShadowsocksR_Libev_Server=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple_Obfs=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_SingBox=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Plugin=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray_Plugin=y
+# CONFIG_PACKAGE_luci-app-haproxy-tcp=y
 
 #VSSR（HelloWord）
 # CONFIG_PACKAGE_luci-app-vssr=y
@@ -493,7 +510,6 @@ echo "
 CONFIG_GRUB_IMAGES=y
 CONFIG_VMDK_IMAGES=y
 " >> .config
-
 
 # 添加设备
 if [ "$1" = "rk33xx" ]; then
