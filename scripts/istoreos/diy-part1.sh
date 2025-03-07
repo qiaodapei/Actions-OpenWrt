@@ -25,3 +25,7 @@
 echo 'src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git' >> feeds.conf.default
 echo 'src-git  passwall https://github.com/xiaorouji/openwrt-passwall.git;main' >> feeds.conf.default
 
+# 直接使用 packages 官方源（覆盖原默认配置）
+sed -i '/src-git-full packages/d' feeds.conf.default  # 删除原有 packages 源
+echo 'src-git packages https://github.com/openwrt/packages.git;master' >> feeds.conf.default
+
