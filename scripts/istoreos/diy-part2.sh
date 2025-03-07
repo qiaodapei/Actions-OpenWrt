@@ -492,6 +492,14 @@ CONFIG_GRUB_IMAGES=y
 CONFIG_VMDK_IMAGES=y
 " >> .config
 
+# 确保 shadowsocks-rust 的依赖已启用
+cat << EOF >> .config
+CONFIG_PACKAGE_rust=y
+CONFIG_PACKAGE_rustc=y
+CONFIG_PACKAGE_cargo=y
+CONFIG_PACKAGE_shadowsocks-rust=y
+EOF
+
 echo "CONFIG_ALL_NONSHARED=n" >> .config
 echo "CONFIG_ALL_KMODS=n" >> .config
 echo "CONFIG_ALL=n" >> .config
