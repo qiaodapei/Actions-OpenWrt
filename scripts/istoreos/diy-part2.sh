@@ -312,8 +312,8 @@ CONFIG_PACKAGE_luci-app-luci-app-rtbwmon=y
 # CONFIG_PACKAGE_luci-app-gowebdav=y
 
 # 科学上网和代理应用
-#SSR
-CONFIG_PACKAGE_luci-app-ssr-plus=y
+# #SSR
+# CONFIG_PACKAGE_luci-app-ssr-plus=y
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_NONE_Client=y
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Libev_Client is not set
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client is not set
@@ -491,6 +491,32 @@ echo "
 CONFIG_GRUB_IMAGES=y
 CONFIG_VMDK_IMAGES=y
 " >> .config
+
+echo "CONFIG_ALL_NONSHARED=n" > .config
+echo "CONFIG_ALL_KMODS=n" >> .config
+echo "CONFIG_ALL=n" >> .config
+echo "CONFIG_AUTOREMOVE=n" >> .config
+echo "CONFIG_SIGNED_PACKAGES=n" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall=m" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_Iptables_Transparent_Proxy=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_Nftables_Transparent_Proxy=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Hysteria=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Client=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Server=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Client=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Server=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ShadowsocksR_Libev_Client=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ShadowsocksR_Libev_Server=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple_Obfs=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_SingBox=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_tuic_client=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Geodata=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Plugin=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray_Plugin=y" >> .config
 
 # 添加设备
 if [ "$1" = "rk33xx" ]; then
