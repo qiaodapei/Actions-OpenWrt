@@ -22,7 +22,7 @@
 # echo 'src-git mosdns https://github.com/sbwml/luci-app-mosdns' >>feeds.conf.default
 # echo 'src-git kiddin9 https://github.com/kiddin9/kwrt-packages' >>feeds.conf
 # 添加 Passwall2 的软件源到 feeds 列表
-echo 'src-git istoreos_packages https://github.com/openwrt/packages.git' >> feeds.conf.default
+echo 'src-git istoreos_packages https://github.com/openwrt/packages.git;openwrt-22.03' >> feeds.conf.default
 echo 'src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git' >> feeds.conf.default
 echo 'src-git  passwall https://github.com/xiaorouji/openwrt-passwall.git;main' >> feeds.conf.default
 
