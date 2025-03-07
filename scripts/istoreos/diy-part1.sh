@@ -22,5 +22,5 @@
 # echo 'src-git mosdns https://github.com/sbwml/luci-app-mosdns' >>feeds.conf.default
 # echo 'src-git kiddin9 https://github.com/kiddin9/kwrt-packages' >>feeds.conf
 # # 添加 Passwall2 的软件源到 feeds 列表
-echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main' >> feeds.conf.default
-echo 'src-git kenzo https://github.com/kenzok8/openwrt-packages.git' >> feeds.conf.default
+# echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main' >> feeds.conf.default
+# echo 'src-git kenzo https://github.com/kenzok8/openwrt-packages.git' >> feeds.conf.default
