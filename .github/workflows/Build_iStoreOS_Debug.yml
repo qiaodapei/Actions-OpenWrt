@@ -52,7 +52,7 @@ jobs:
         target: [x86, rk35xx, rk33xx, phicomm-n1] # 使用矩阵来并行化构建不同的目标 
         include:
           - target: x86 
-            use_ngrok: false
+            use_ngrok: true
             use_sleep: false
           - target: rk33xx
             use_ngrok: false 
