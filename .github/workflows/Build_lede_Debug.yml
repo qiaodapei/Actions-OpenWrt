@@ -50,7 +50,7 @@ jobs:
         target: [X86-Mini, ARMv8-Mini] # 使用矩阵来并行化构建不同的目标 
         include:
           - target: X86-Mini 
-            use_ngrok: true
+            use_ngrok: false
             use_sleep: false
             CONFIG_FILE: ARMv8.config
             DIY_P1_SH: scripts/diy-mini/diy-part1.sh
@@ -175,19 +175,19 @@ jobs:
 
     - name: 加载自定义 feeds
       run: |
-        chmod +x $DIY_P1_SH
+        chmod +x ${{ matrix.DIY_P1_SH }}
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P1_SH
+        $GITHUB_WORKSPACE/${{ matrix.DIY_P1_SH }}
 
     - name: 加载自定义配置
       env:
-        CONFIG_FILE_PATH: config/${{ env.CONFIG_FILE }}
+        CONFIG_FILE_PATH: config/${{ matrix.CONFIG_FILE }}
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE_PATH ] && mv $CONFIG_FILE_PATH openwrt/$CONFIG_FILE
-        chmod +x $DIY_P2_SH
+        chmod +x ${{ matrix.DIY_P2_SH }}
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P2_SH
+        $GITHUB_WORKSPACE/${{ matrix.DIY_P2_SH }}
 
     - name: 下载软件包
       id: package
