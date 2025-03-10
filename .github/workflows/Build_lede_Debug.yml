@@ -32,6 +32,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   FEEDS_CONF: feeds.conf
+  CONFIG_FILE: .config
   WORK_DIR: /mnt/workdir
   UPLOAD_BIN_DIR: true
   UPLOAD_FIRMWARE: true
@@ -193,6 +194,7 @@ jobs:
       id: package
       run: |
         cd openwrt
+        echo "CONFIG_FILE:$CONFIG_FILE"
         if [ ! -f "$CONFIG_FILE" ]; then
           echo "::error::❌ 错误：配置文件 $CONFIG_FILE 不存在"
           exit 1
