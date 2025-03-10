@@ -8,7 +8,7 @@ on:
       repo_branch:
         description: 'lede 仓库分支'
         required: true
-        default: 'main'
+        default: 'master'
       lan_ip:
         description: '设置LAN IP地址'
         required: true
