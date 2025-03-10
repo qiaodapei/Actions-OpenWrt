@@ -1,0 +1,315 @@
+name: Build lede mini Debug
+
+# 添加版本兼容性声明
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      repo_branch:
+        description: 'lede 仓库分支'
+        required: true
+        default: 'main'
+      lan_ip:
+        description: '设置LAN IP地址'
+        required: true
+        default: '192.168.10.1'
+      os_name:
+        description: '设置系统名称'
+        required: true
+        default: 'iStore OS'
+      enable_wifi:
+        description: '启用WiFi'
+        required: true
+        default: true
+        type: boolean
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+  # schedule:
+  #  - cron: 0 16 * * *
+
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  FEEDS_CONF: feeds.conf
+  WORK_DIR: /mnt/workdir
+  UPLOAD_BIN_DIR: true
+  UPLOAD_FIRMWARE: true
+  UPLOAD_RELEASE: true
+  TZ: Asia/Shanghai
+  KERNEL_VERSION: 6.1.79
+  GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false  # 允许其他架构继续构建
+      matrix:
+        os: ['ubuntu-22.04'] # 可以添加更多操作系统
+        target: [X86-Mini, ARMv8-Mini] # 使用矩阵来并行化构建不同的目标 
+        include:
+          - target: X86-Mini 
+            use_ngrok: true
+            use_sleep: false
+            CONFIG_FILE: ARMv8.config
+            DIY_P1_SH: scripts/diy-mini/diy-part1.sh
+            DIY_P2_SH: scripts/diy-mini/diy-part2.sh
+          - target: ARMv8-Mini
+            use_ngrok: false
+            use_sleep: false
+            CONFIG_FILE: X86.config
+            DIY_P1_SH: scripts/diy-mini/diy-part1.sh
+            DIY_P2_SH: scripts/diy-mini/diy-part2.sh
+
+    steps:
+    - name: 准备完成
+      uses: actions/checkout@v4
+    - name: 验证输入参数
+      run: |
+        echo "开始验证输入参数..."
+        echo "验证仓库分支是否存在..."
+        if ! git ls-remote --exit-code --heads $REPO_URL refs/heads/${{ github.event.inputs.repo_branch }}; then
+          echo "::error::❌ 错误：分支 '${{ github.event.inputs.repo_branch }}' 不存在于仓库中！"
+          exit 1
+        fi
+        echo "验证LAN IP地址格式：${{ github.event.inputs.lan_ip }}"
+        LAN_IP="${{ github.event.inputs.lan_ip }}"
+        if ! echo "$LAN_IP" | grep -Eq '^([0-9]{1,3}\.){3}[0-9]{1,3}$'; then
+          echo "::error::❌ 错误：IP地址格式无效 '$LAN_IP'，必须为 IPv4 格式（如 192.168.1.1）"
+          exit 1
+        fi
+        IFS='.' read -ra OCTETS <<< "$LAN_IP"
+        for OCTET in "${OCTETS[@]}"; do
+          if [[ $OCTET -lt 0 || $OCTET -gt 255 ]]; then
+            echo "::error::❌ 错误：IP地址 '$LAN_IP' 包含无效数字（必须 0-255）"
+            exit 1
+          fi
+        done
+        if [[ ! $LAN_IP =~ ^(192\.168|10\.|172\.(1[6-9]|2[0-9]|3[0-1])) ]]; then
+          echo "::warning::⚠️ 注意：LAN IP '$LAN_IP' 不是标准内网地址（建议使用 192.168.x.x/10.x.x.x/172.16-31.x.x）"
+        fi
+        
+    - name: Setup SSH tunnel
+      if: ${{ matrix.use_ngrok == true }}
+      uses: qiaodapei/github-ngrok-ssh@main
+      with:
+        timeout: 6h
+        ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+        ngrok_token: ${{ secrets.NGROK_TOKEN }}
+
+    - name: 检查服务器配置
+      run: |
+        echo "若分配的服务器性能不足，务必及时取消，重新运行！"
+        echo -e "------------------------------- CPU信息 -------------------------------\n"
+        echo "CPU物理数量:$(cat /proc/cpuinfo| grep 'physical id'| sort| uniq| wc -l)"
+        echo -e "CPU核心及版本信息: $(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+        echo -e "------------------------------- 内存信息 -------------------------------\n"
+        echo "已安装内存详细信息: "
+        sudo lshw -short -C memory | grep GiB
+        echo -e "\n"
+        echo -e "------------------------------- 磁盘信息 -------------------------------\n"
+        echo -e "磁盘数量: $(ls /dev/sd* | grep -v '[1-9]' | wc -l) \n"
+        echo "------------------------------- 磁盘详情 -------------------------------\n"
+        df -Th
+
+    - name: 安装 Go 1.21.1
+      uses: actions/setup-go@v5
+      with:
+        go-version: 1.21.1
+        cache: false  # 关键：禁用 Go 模块缓存
+
+    - name: 初始化编译环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        echo "------------------------------- 更新并安装依赖 -------------------------------"
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /etc/mysql /etc/php /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        DEPENDS_FILE="$GITHUB_WORKSPACE/depends/${{ matrix.os }}"
+        if [ -f "$DEPENDS_FILE" ]; then
+          echo "正在从 $DEPENDS_FILE 读取依赖..."
+          sudo -E apt-get -qq install $(cat "$DEPENDS_FILE")
+        fi
+        wget https://bootstrap.pypa.io/pip/3.6/get-pip.py
+        sudo python3 get-pip.py
+        sudo rm -rf get-pip.py
+        sudo pip install pyelftools
+        echo "------------------------------- 清理Docker镜像和软件 -------------------------------"
+        docker rmi $(docker images -q)
+        docker image prune -a -f
+        sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* adoptopenjdk* mysql* php* mongodb* dotnet* moby* snapd* android* || true
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        echo "------------------------------- 设置工作目录及时区 -------------------------------"
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /mnt/workdir
+        sudo chown $USER:$GROUPS /mnt/workdir
+
+    - name: 克隆源码
+      working-directory: /mnt/workdir
+      run: |
+        df -hT $PWD
+        REPO_BRANCH=${{ github.event.inputs.repo_branch }}
+        git clone $REPO_URL -b $REPO_BRANCH openwrt || {
+          echo "::error::❌ 仓库克隆失败，请检查网络连接或仓库权限";
+          exit 1;
+        }
+        if [ ! -d "openwrt/.git" ]; then
+          echo "::error::❌ 错误：仓库克隆不完整，缺少.git目录"
+          exit 1
+        fi
+        cd openwrt
+        git checkout $REPO_BRANCH || {
+          echo "::error::❌ 无法切换到指定分支 '$REPO_BRANCH'";
+          exit 1;
+        }
+        ln -sf /mnt/workdir/openwrt $GITHUB_WORKSPACE/openwrt
+
+    - name: 缓存构建动作
+      uses: klever1988/cachewrtbuild@main
+      with:
+        ccache: 'true'
+        mixkey: ${{ matrix.target }}-${{ github.event.inputs.repo_branch }}
+        prefix: ${{ github.workspace }}/openwrt
+
+    - name: 加载自定义 feeds
+      run: |
+        chmod +x $DIY_P1_SH
+        cd openwrt
+        $GITHUB_WORKSPACE/$DIY_P1_SH
+
+    - name: 加载自定义配置
+      env:
+        CONFIG_FILE_PATH: config/${{ env.CONFIG_FILE }}
+      run: |
+        [ -e files ] && mv files openwrt/files
+        [ -e $CONFIG_FILE_PATH ] && mv $CONFIG_FILE_PATH openwrt/$CONFIG_FILE
+        chmod +x $DIY_P2_SH
+        cd openwrt
+        $GITHUB_WORKSPACE/$DIY_P2_SH
+
+    - name: 下载软件包
+      id: package
+      run: |
+        cd openwrt
+        if [ ! -f "$CONFIG_FILE" ]; then
+          echo "::error::❌ 错误：配置文件 $CONFIG_FILE 不存在"
+          exit 1
+        fi
+        make defconfig
+        make download -j8 || {
+          echo "::error::❌ 软件包下载失败";
+          exit 1;
+        }
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+
+    - name: 编译固件
+      id: compile
+      run: |
+        cd openwrt
+        echo "使用 $(nproc) 线程进行编译..."
+        echo "FILE_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        set +eo pipefail
+        make -j$(nproc) || {
+          echo "::warning::⚠️ 并行编译失败，尝试单线程编译...";
+          make -j1 V=s || {
+            echo "::error::❌ 严重错误：编译最终失败，请检查以下可能原因：
+            1. 软件包依赖不满足
+            2. 配置文件存在冲突
+            3. 系统资源不足";
+            # exit 1;
+          }
+        }
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 检查磁盘空间
+      if: (!cancelled())
+      run: df -hT
+
+    # - name: 上传 bin 文件夹
+    #   uses: actions/upload-artifact@main
+    #   if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+    #   with:
+    #     name: OpenWrt_bin_${{ matrix.target }}_${{ env.FILE_DATE }}
+    #     path: openwrt/bin
+
+    - name: Package Armvirt as OpenWrt
+      uses: ophub/flippy-openwrt-actions@main
+      env:
+        OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*.tar.gz
+        PACKAGE_SOC: s905d
+        KERNEL_VERSION_NAME: ${{ env.KERNEL_VERSION }}
+        WHOAMI: huangqian8
+
+    - name: 整理固件文件
+      id: organize
+      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      run: |
+        cd openwrt/bin/targets/*/*
+        # rm -rf packages
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 上传固件目录
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: OpenWrt_firmware_${{ matrix.target }}_${{ env.FILE_DATE }}
+        path: ${{ env.FIRMWARE }}
+
+    - name: 生成发布标签
+      id: tag
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
+      run: |
+        # echo "release_tag=${{ matrix.target }}-${{ env.FILE_DATE }}" >> $GITHUB_OUTPUT
+        touch release.txt
+        echo "
+        💻 架构: ${{ matrix.target }}
+
+        📂 源码: ${{ env.REPO_URL }}
+
+        🌳 分支: ${{ github.event.inputs.repo_branch }}
+
+        ⏱️ 编译时间: $(date +"%Y年%m月%d日%H时%M分")
+
+        🌐 管理地址: 192.168.10.1
+
+        👤 用户名: root
+
+        🔒 密码: password " >> release.txt
+        # echo "status=success" >> $GITHUB_OUTPUT
+        # 设置两个输出变量
+        {
+          echo "release_tag=${{ matrix.target }}-${{ env.FILE_DATE }}"
+          echo "status=success"
+        } >> $GITHUB_OUTPUT
+        
+
+    - name: 自动发布固件到 Releases
+      uses: softprops/action-gh-release@v1
+      if: steps.tag.outputs.status == 'success' && !cancelled()
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        body_path: release.txt
+        files: ${{ env.FIRMWARE }}/*
+
+    - name: 删除运行记录
+      uses: GitRML/delete-workflow-runs@main
+      with:
+        retain_days: 1
+        keep_minimum_runs: 3
+        token: ${{ env.GITHUB_TOKEN }}
+
+    - name: 删除自动发布的旧固件
+      uses: dev-drprasad/delete-older-releases@v0.1.0
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      with:
+        keep_latest: 8
+        delete_tags: true
+    - name: Keep ngrok running
+      if: ${{ matrix.use_sleep == true }}
+      run: |
+        sleep 19800  # Sleep for 5 hours and 30 minutes (19800 seconds)
+        pkill ngrok  # Kill the ngrok process after 12 hours
