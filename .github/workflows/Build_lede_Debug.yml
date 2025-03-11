@@ -53,13 +53,13 @@ jobs:
           - target: X86-Mini 
             use_ngrok: false
             use_sleep: false
-            CONFIG_FILE: ARMv8.config
+            CONFIG_FILE: X86.config
             DIY_P1_SH: scripts/diy-mini/diy-part1.sh
             DIY_P2_SH: scripts/diy-mini/diy-part2.sh
           - target: ARMv8-Mini
-            use_ngrok: false
-            use_sleep: false
-            CONFIG_FILE: X86.config
+            use_ngrok: true
+            use_sleep: true
+            CONFIG_FILE: ARMv8.config
             DIY_P1_SH: scripts/diy-mini/diy-part1.sh
             DIY_P2_SH: scripts/diy-mini/diy-part2.sh
 
