@@ -255,12 +255,21 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 上传固件目录
+    - name: 上传x86固件目录
       uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success' && !cancelled()
+      if: steps.organize.outputs.status == 'success' && ${{ matrix.target == 'X86-Mini' }}  && !cancelled()
       with:
         name: OpenWrt_firmware_${{ matrix.target }}_${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
+
+    - name: 上传ARMv8固件目录
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && ${{ matrix.target == 'ARMv8-Mini' }} && !cancelled() 
+      with:
+        name: OpenWrt_firmware_${{ matrix.target }}_${{ env.FILE_DATE }}
+        path: |
+            ${{ env.FIRMWARE }}
+            ${{ env.PACKAGED_OUTPUTPATH }}
 
     - name: 删除自动发布的旧固件
       uses: dev-drprasad/delete-older-releases@v0.1.0
