@@ -214,17 +214,40 @@ jobs:
         echo "使用 $(nproc) 线程进行编译..."
         echo "FILE_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
         set +eo pipefail
-        make -j$(nproc) || {
-          echo "::warning::⚠️ 并行编译失败，尝试单线程编译...";
-          make -j1 V=s || {
-            echo "::error::❌ 严重错误：编译最终失败，请检查以下可能原因：
-            1. 软件包依赖不满足
-            2. 配置文件存在冲突
-            3. 系统资源不足";
-            # exit 1;
-          }
+
+        # 添加编译后目录检查
+        compile_success() {
+          echo "::notice::✅ 编译成功，输出目录："
+          ls -lh bin/targets/*/*
+          echo "status=success" >> $GITHUB_OUTPUT
         }
-        echo "status=success" >> $GITHUB_OUTPUT
+
+        if ! make -j$(nproc); then
+          echo "::warning::⚠️ 并行编译失败，尝试单线程编译..."
+          if make -j1 V=s; then
+            compile_success
+          else
+            echo "::error::❌ 编译最终失败"
+            if ${{ matrix.use_sleep }}; then
+              echo "启用调试等待..."
+              sleep 19800  # 保持运行5.5小时
+            fi
+            exit 1
+          fi
+        else
+          compile_success
+        fi
+        # make -j$(nproc) || {
+        #   echo "::warning::⚠️ 并行编译失败，尝试单线程编译...";
+        #   make -j1 V=s || {
+        #     echo "::error::❌ 严重错误：编译最终失败，请检查以下可能原因：
+        #     1. 软件包依赖不满足
+        #     2. 配置文件存在冲突
+        #     3. 系统资源不足";
+        #     # exit 1;
+        #   }
+        # }
+        # echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 检查磁盘空间
       if: (!cancelled())
@@ -250,8 +273,21 @@ jobs:
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
-        cd openwrt/bin/targets/*/*
-        # rm -rf packages
+        set -euo pipefail
+        cd openwrt/bin/targets/
+        # 动态获取目标目录
+        TARGET_DIR=$(find . -maxdepth 2 -type d -name '*' | head -1)
+        if [ -z "$TARGET_DIR" ]; then
+          echo "::error::❌ 找不到固件目录，可能编译失败"
+          if ${{ matrix.use_sleep }}; then
+            echo "启用调试等待..."
+            sleep 19800
+          fi
+          exit 1
+        fi
+        cd "$TARGET_DIR"
+        echo "当前固件目录：$PWD"
+        ls -lh
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
