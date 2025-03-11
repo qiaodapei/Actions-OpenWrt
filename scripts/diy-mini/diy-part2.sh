@@ -116,6 +116,10 @@ CONFIG_PACKAGE_luci-lib-ipkg=y
 CONFIG_PACKAGE_wget-ssl=y
 CONFIG_PACKAGE_curl=y
 
+# 添加store
+CONFIG_PACKAGE_luci-app-store=y
+CONFIG_PACKAGE_luci-lib-ipkg=y
+
 " >> .config
 
 # 额外组件
