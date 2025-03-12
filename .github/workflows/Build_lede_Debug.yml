@@ -193,6 +193,8 @@ jobs:
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE_PATH ] && mv $CONFIG_FILE_PATH openwrt/.config
+        ls -al openwrt/.config
+        cat openwrt/.config
         chmod +x ${{ matrix.DIY_P2_SH }}
         cd openwrt
         $GITHUB_WORKSPACE/${{ matrix.DIY_P2_SH }}
@@ -206,6 +208,7 @@ jobs:
           echo "::error::❌ 错误：配置文件 $CONFIG_FILE 不存在"
           exit 1
         fi
+        cat openwrt/.config
         make defconfig
         make download -j8 || {
           echo "::error::❌ 软件包下载失败";
