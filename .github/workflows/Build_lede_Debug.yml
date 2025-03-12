@@ -208,7 +208,7 @@ jobs:
           echo "::error::❌ 错误：配置文件 $CONFIG_FILE 不存在"
           exit 1
         fi
-        cat openwrt/.config
+        cat .config
         make defconfig
         make download -j8 || {
           echo "::error::❌ 软件包下载失败";
