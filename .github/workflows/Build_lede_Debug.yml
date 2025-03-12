@@ -293,14 +293,14 @@ jobs:
 
     - name: 上传x86固件目录
       uses: actions/upload-artifact@main
-      if: ${{ matrix.target == 'X86-Mini' }} && steps.organize.outputs.status == 'success' && !cancelled()
+      if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware_${{ matrix.target }}_${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
 
     - name: 上传ARMv8固件目录
       uses: actions/upload-artifact@main
-      if: ${{ matrix.target == 'ARMv8-Mini' }} && steps.organize.outputs.status == 'success' && !cancelled()
+      if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware_${{ matrix.target }}_${{ env.FILE_DATE }}
         path: |
