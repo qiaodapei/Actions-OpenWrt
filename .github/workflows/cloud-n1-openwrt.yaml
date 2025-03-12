@@ -1,106 +1,164 @@
-name: Cloud N1 OpenWrt
+name: Build OpenWrt
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'README.md'
-      - 'script.sh'
-      - 'config.sh'
-  schedule:
-    - cron: 0 8 * * 0
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+  # schedule:
+  #   - cron: 43 12 * * *
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   SCRIPT_SH: script.sh
-  CONFIG_SH: config.sh
+  FEEDS_CONF: feeds.conf.default
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
-  KERNEL_VERSION: 6.1.79
+  # KERNEL_VERSION: 6.1.79
 
 jobs:
   build_openwrt:
-    name: Build OpenWrt and release
-    runs-on: ubuntu-20.04
-
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        target: [armvirt, x86]  # 使用矩阵来并行化构建不同的目标
+        include:
+          - target: armvirt
+            config_file: config/ARMv8.config
+            cpu_warning: "已知编译成功CPU型号：8370C,8171M"
+            use_ngrok: false
+            use_sleep: false
+          - target: x86
+            config_file: config/X86.config
+            cpu_warning: "已知编译成功CPU型号：8370C,8171M"
+            use_ngrok: true
+            use_sleep: true
     steps:
+    - name: 检出
+      uses: actions/checkout@main
 
-    - name: Free Disk Space (Ubuntu)
+    - name: Setup SSH tunnel
+      if: ${{ matrix.use_ngrok == true }}
+      uses: qiaodapei/github-ngrok-ssh@main
+      with:
+        timeout: 6h
+        ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+        ngrok_token: ${{ secrets.NGROK_TOKEN }}
+
+    - name: 清理磁盘 (Ubuntu)
       uses: jlumbroso/free-disk-space@main
       with:
-        # this might remove tools that are actually needed,
-        # if set to "true" but frees about 6 GB
         tool-cache: true
-
-        # all of these default to true, but feel free to set to
-        # "false" if necessary for your workflow
         android: true
         dotnet: true
         haskell: true
         large-packages: true
         swap-storage: true
 
-    - name: Checkout
-      uses: actions/checkout@v3.1.0
-      with:
-        ref: main
-
-    - name: Disk space
+    - name: 检查服务器配置
       run: |
-           echo "Free space:"
-           df -h
+        echo "警告⚠"
+        echo "${{ matrix.cpu_warning }}"
+        echo "已知性能不足CPU型号：8272CL"
+        echo -e "-------------- ------------CPU信息------------------------------------------\n"
+        echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
+        echo -e "CPU核心及版本信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+        echo "-------------------------------内存信息-------------------------------------------"
+        echo "已安装内存详细信息："
+        sudo lshw -short -C memory | grep GiB
+        echo -e "\n"
+        echo "-----------------------------硬盘信息---------------------------------------------"
+        echo -e  "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l) \n"
+        echo "硬盘详情："
+        df -Th
 
-    - name: Initialization environment
+    - name: 初始化环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo -E apt-mark hold grub-efi-amd64-signed
-        sudo -E apt-get -qq update --fix-missing
-        sudo -E apt-get -qq full-upgrade
-        sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+        sudo -E apt -y purge azure-cli ghc* zulu* texlive* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
+        [[ -n "${AGENT_TOOLSDIRECTORY}" ]] && sudo rm -rf "${AGENT_TOOLSDIRECTORY}"
+        sudo -E apt update
+        sudo -E apt -y install clang llvm lld qemu-utils
+        sudo -E apt -y autoremove --purge
+        sudo -E systemctl daemon-reload
+        sudo -E apt clean && sudo -E apt autoclean
         sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /mnt/workdir
+        sudo chown $USER:$GROUPS /mnt/workdir
+        echo "status=success" >> ${GITHUB_OUTPUT}
+        df -Th
 
-    - name: Clone source code
+    - name: 克隆源代码
+      working-directory: /mnt/workdir
       run: |
-        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        ln -sf /mnt/workdir/openwrt $GITHUB_WORKSPACE/openwrt
         cd openwrt
-        useVersionInfo=$(git show -s --date=short --format="date: %cd<br/>commit: %s<br/>commit hash: %H")
+        useVersionInfo=$(git show -s --date=short --format="Author: %an<br/>date: %cd<br/>commit: %s<br/>commit hash: %H")
         echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
+        echo "DATE1=$(date "+%Y-%m-%d")" >> $GITHUB_ENV
         echo "tag_name=$(date +%Y%m%d)" >> $GITHUB_ENV
-
-    - name: Update feeds
-      run: |
-        [ -e files ] && mv files openwrt/files
-        chmod +x $SCRIPT_SH
-        ./$SCRIPT_SH
-        cd openwrt
-        echo "src-git helloworld https://github.com/fw876/helloworld.git" >> "feeds.conf.default"
-        ./scripts/feeds update -a
-        cat feeds/packages/utils/xfsprogs/Makefile
-        sed -i 's/TARGET_CFLAGS += -DHAVE_MAP_SYNC/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/' feeds/packages/utils/xfsprogs/Makefile
-        ./scripts/feeds update -a
-
-    - name: Install feeds
+        
+    - name: 加载自定义源
       run: |
         cd openwrt
-        ./scripts/feeds install -a
+        sed -i '1i src-git kenzo https://github.com/kenzok8/openwrt-packages' feeds.conf.default
+        sed -i '2i src-git small https://github.com/kenzok8/small' feeds.conf.default
+        sed -i '3i src-git linkease_nas https://github.com/linkease/nas-packages.git' feeds.conf.default
+        sed -i '4i src-git linkease_nas_luci https://github.com/linkease/nas-packages-luci.git' feeds.conf.default
+        # sed -i '5i src-git ota https://github.com/breeze303/luci-app-ota.git;main' feeds.conf.default
 
-    - name: Load custom configuration
+    - name: 更新源
       run: |
-        chmod +x $CONFIG_SH
-        ./$CONFIG_SH
+        cd openwrt && ./scripts/feeds update -a
+        rm -rf feeds/luci/applications/luci-app-mosdns
+        rm -rf feeds/packages/net/{alist,adguardhome,mosdns,xray*,v2ray*,v2ray*,sing*,smartdns}
+        rm -rf feeds/packages/utils/v2dat
+        rm -rf feeds/packages/lang/golang
+        git clone https://github.com/kenzok8/golang feeds/packages/lang/golang
 
-    - name: Download package
+    - name: 安装源
+      run: cd openwrt && ./scripts/feeds install -a
+
+    - name: 自定义配置openwrt
+      run: |
+        cd openwrt
+        # 修改默认IP为 192.168.9.1
+        sed -i 's/192.168.1.1/192.168.9.1/g' package/base-files/files/bin/config_generate
+        sed -i 's/192.168.1.1/192.168.9.1/g' package/base-files/luci2/bin/config_generate
+        # 修改默认主机名为MiyaWrt
+        sed -i '/uci commit system/i\uci set system.@system[0].hostname='iStoreOS'' package/lean/default-settings/files/zzz-default-settings
+        sed -i "13i uci set network.lan.ifname='eth1 eth2 eth3'" package/lean/default-settings/files/zzz-default-settings
+        sed -i "14i uci set network.wan.ifname='eth0'" package/lean/default-settings/files/zzz-default-settings
+        # sed -i '13i uci set network.lan.ifname=''eth1 eth2 eth3'' package/lean/default-settings/files/zzz-default-settings
+        # sed -i '14i uci set network.wan.ifname='eth0'' package/lean/default-settings/files/zzz-default-settings
+        # 修改默认主题
+        sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" feeds/luci/collections/luci/Makefile
+        sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" feeds/luci/collections/luci-light/Makefile
+
+    - name: 加载自定义配置
+      run: |
+        [ -e ${{ matrix.config_file }} ] && mv ${{ matrix.config_file }} openwrt/.config
+
+    - name: 下载软件包
+      id: package
       run: |
         cd openwrt
         make defconfig
         make download -j8
+        find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-
-    - name: Compile the firmware
+        rm -rf $GITHUB_WORKSPACE/.git
+        rm -rf $GITHUB_WORKSPACE/opt
+        df -Th
+  
+    - name: 编译固件
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
@@ -116,40 +174,14 @@ jobs:
         rm -rf ./build_dir
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: Package Armvirt as OpenWrt
-      uses: ophub/flippy-openwrt-actions@main
-      env:
-        OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*.tar.gz
-        PACKAGE_SOC: s905d
-        KERNEL_VERSION_NAME: ${{ env.KERNEL_VERSION }}
-        WHOAMI: huangqian8
-
-    - name: Organize files
-      id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-      run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages openwrt-armvirt-64-default.manifest openwrt-armvirt-64-Image sha256sums version.buildinfo feeds.buildinfo openwrt-armvirt-64-generic-kernel.bin openwrt-armvirt-64-generic.manifest
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "status=success" >> $GITHUB_OUTPUT
-
-    - name: Upload firmware directory
-      uses: actions/upload-artifact@v4
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      with:
-        name: OpenWrt_firmware
-        path: |
-            ${{ env.FIRMWARE }}
-            ${{ env.PACKAGED_OUTPUTPATH }}
-
     - name: Create release
       uses: ncipollo/release-action@v1
       with:
-        name: ${{ env.DATE }} ❤️ | N1-OpenWrt 自动编译打包
+        name: ${{ env.DATE }} ❤️ | OpenWrt 自动编译打包
         allowUpdates: true
         tag: ${{ env.tag_name }}
         commit: main
-        token: ${{ secrets.actions_release }}
+        token: ${{ secrets.ACTIONS_RELEASE }}
         body: |
           编译使用版本:
           ${{ env.useVersionInfo }}
@@ -157,8 +189,8 @@ jobs:
           刷机固件简介：
             打包日期：${{ env.PACKAGED_OUTPUTDATE }}
             内核版本：${{ env.KERNEL_VERSION }}
-            默认IP：192.168.1.1 默认用户名密码： root/password
-        artifacts: "${{ env.FIRMWARE }}/*.*,${{ env.PACKAGED_OUTPUTPATH }}/*.*"
+            默认IP：192.168.9.1 默认用户名密码： root/password
+        artifacts: "openwrt/bin/targets/*/*/*"
 
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.3.2
@@ -166,4 +198,18 @@ jobs:
         keep_latest: 3
         delete_tags: true
       env:
-        GITHUB_TOKEN: ${{ secrets.actions_release }}
+        GITHUB_TOKEN: ${{ secrets.ACTIONS_RELEASE }}
+        
+    - name: 删除旧的工作流和固件
+      uses: Mattraks/delete-workflow-runs@main
+      with:
+        token: ${{ secrets.ACTIONS_RELEASE }}
+        repository: ${{ github.repository }}
+        delete_workflow_pattern: Build OpenWrt
+        retain_days: 0
+        keep_minimum_runs: 1
+    - name: Keep ngrok running
+      if: ${{ matrix.use_sleep == true }}
+      run: |
+        sleep 43200  # Sleep for 12 hours (7200 seconds)
+        pkill ngrok  # Kill the ngrok process after 12 hours
