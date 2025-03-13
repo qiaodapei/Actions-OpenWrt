@@ -189,6 +189,9 @@ jobs:
 
     - name: 更新 feeds
       run: cd openwrt && ./scripts/feeds update -a
+
+    - name: 安装 feeds
+      run: cd openwrt && ./scripts/feeds install -a
         
     - name: 加载自定义配置
       env:
@@ -201,9 +204,6 @@ jobs:
         chmod +x ${{ matrix.DIY_P2_SH }}
         cd openwrt
         $GITHUB_WORKSPACE/${{ matrix.DIY_P2_SH }}
-
-    - name: 安装 feeds
-      run: cd openwrt && ./scripts/feeds install -a
 
     - name: 下载软件包
       id: package
