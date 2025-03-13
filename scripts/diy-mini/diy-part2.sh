@@ -23,5 +23,3 @@ sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" feeds/luci/collections/luci-l
 
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/kenzok8/golang feeds/packages/lang/golang
-
-./scripts/feeds update -a
