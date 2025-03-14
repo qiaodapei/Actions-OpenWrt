@@ -1,4 +1,4 @@
-name: Build lede mini Debug
+name: Build lede Debug
 
 # 添加版本兼容性声明
 on:
