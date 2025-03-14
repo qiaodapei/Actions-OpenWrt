@@ -51,3 +51,28 @@ cp -rf ../../kiddin9/luci-app-netdata/* luci-app-netdata
 #rtbwmon（实施流量）
 mkdir luci-app-rtbwmon
 cp -rf ../../kiddin9/luci-app-rtbwmon/* luci-app-rtbwmon
+
+# poweroff关机插件
+git clone https://github.com/DongyangHu/luci-app-poweroff.git
+
+# 添加第三方应用
+echo "
+# 系统相关应用
+CONFIG_PACKAGE_luci-app-poweroff=y
+CONFIG_PACKAGE_luci-app-fileassistant=y
+# CONFIG_PACKAGE_luci-app-guest-wifi=y
+CONFIG_PACKAGE_luci-app-onliner=y
+CONFIG_PACKAGE_luci-app-eqos=y
+# CONFIG_PACKAGE_luci-app-wolplus=y
+CONFIG_PACKAGE_luci-app-wifischedule=y
+CONFIG_PACKAGE_luci-app-ramfree=y
+# CONFIG_PACKAGE_luci-app-usb3disable=y
+CONFIG_PACKAGE_luci-app-luci-app-netdata=y
+CONFIG_PACKAGE_luci-app-luci-app-rtbwmon=y
+
+存储相关应用
+CONFIG_PACKAGE_luci-app-gowebdav=y
+# 其他
+CONFIG_PACKAGE_luci-app-socat=y
+
+" >> .config
