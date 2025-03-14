@@ -195,12 +195,15 @@ jobs:
         
     - name: 加载自定义配置
       env:
+        LAN_IP: ${{ github.event.inputs.lan_ip }}
+        OS_NAME: ${{ github.event.inputs.os_name }}
+        ENABLE_WIFI: ${{ github.event.inputs.enable_wifi }}
         CONFIG_FILE_PATH: config/${{ matrix.CONFIG_FILE }}
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE_PATH ] && mv $CONFIG_FILE_PATH openwrt/.config
         ls -al openwrt/.config
-        cat openwrt/.config
+        # cat openwrt/.config
         chmod +x ${{ matrix.DIY_P2_SH }}
         cd openwrt
         $GITHUB_WORKSPACE/${{ matrix.DIY_P2_SH }}
