@@ -27,3 +27,27 @@ sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" feeds/luci/collections/luci-l
 
 # rm -rf feeds/packages/lang/golang
 # git clone https://github.com/kenzok8/golang feeds/packages/lang/golang
+
+# 添加第三方应用
+mkdir kiddin9
+pushd kiddin9
+git clone --depth=1 https://github.com/kiddin9/kwrt-packages .
+popd
+
+mkdir package/community
+pushd package/community
+
+#Onliner
+mkdir luci-app-onliner
+cp -rf ../../kiddin9/luci-app-onliner/* luci-app-onliner
+
+#RAMfree
+mkdir luci-app-ramfree
+cp -rf ../../kiddin9/luci-app-ramfree/* luci-app-ramfree
+
+#NetData（系统监控）
+mkdir luci-app-netdata
+cp -rf ../../kiddin9/luci-app-netdata/* luci-app-netdata
+#rtbwmon（实施流量）
+mkdir luci-app-rtbwmon
+cp -rf ../../kiddin9/luci-app-rtbwmon/* luci-app-rtbwmon
