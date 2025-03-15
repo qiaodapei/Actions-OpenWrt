@@ -57,6 +57,8 @@ cp -rf ../../kiddin9/luci-app-rtbwmon/* luci-app-rtbwmon
 # poweroff关机插件
 git clone https://github.com/DongyangHu/luci-app-poweroff.git
 
+popd
+
 # 添加第三方应用
 echo "
 # 系统相关应用
