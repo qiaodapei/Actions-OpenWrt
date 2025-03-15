@@ -99,7 +99,8 @@ CONFIG_PACKAGE_luci-app-fileassistant=y
 ##############################################
 # 网络相关应用
 ##############################################
-# 应用过滤插件
+# 插件：应用过滤
+CONFIG_DEFAULT_appfilter=y
 CONFIG_PACKAGE_appfilter=y
 # Socat插件
 CONFIG_PACKAGE_luci-app-socat=y
