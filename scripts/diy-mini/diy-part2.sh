@@ -74,7 +74,7 @@ CONFIG_PACKAGE_luci-app-ramfree=y
 CONFIG_PACKAGE_luci-app-luci-app-netdata=y
 CONFIG_PACKAGE_luci-app-luci-app-rtbwmon=y
 
-存储相关应用
+# 存储相关应用
 CONFIG_PACKAGE_luci-app-gowebdav=y
 # 其他
 CONFIG_PACKAGE_luci-app-socat=y
