@@ -48,7 +48,7 @@ jobs:
       fail-fast: false  # 允许其他架构继续构建
       matrix:
         os: ['ubuntu-22.04'] # 可以添加更多操作系统
-        target: [X86-Mini, ARMv8-Mini] # 使用矩阵来并行化构建不同的目标 
+        target: [X86, ARMv8] # 使用矩阵来并行化构建不同的目标 
         include:
           - target: X86-Mini 
             use_ngrok: true
