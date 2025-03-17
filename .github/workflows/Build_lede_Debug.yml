@@ -51,8 +51,8 @@ jobs:
         target: [X86-Mini, ARMv8-Mini] # 使用矩阵来并行化构建不同的目标 
         include:
           - target: X86-Mini 
-            use_ngrok: false
-            use_sleep: false
+            use_ngrok: true
+            use_sleep: true
             CONFIG_FILE: X86.config
             DIY_P1_SH: scripts/diy-mini/diy-part1.sh
             DIY_P2_SH: scripts/diy-mini/diy-part2.sh
@@ -60,8 +60,8 @@ jobs:
             FIRMWARE_FILES: |
               openwrt/bin/targets/x86/64/*
           - target: ARMv8-Mini
-            use_ngrok: true
-            use_sleep: true
+            use_ngrok: false
+            use_sleep: false
             CONFIG_FILE: ARMv8.config
             DIY_P1_SH: scripts/diy-mini/diy-part1.sh
             DIY_P2_SH: scripts/diy-mini/diy-part2.sh
