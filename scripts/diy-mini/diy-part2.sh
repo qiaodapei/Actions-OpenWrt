@@ -100,8 +100,7 @@ CONFIG_PACKAGE_luci-app-fileassistant=y
 # 网络相关应用
 ##############################################
 # 插件：应用过滤
-CONFIG_DEFAULT_appfilter=y
-CONFIG_PACKAGE_appfilter=y
+CONFIG_PACKAGE_luci-app-oaf=y
 # Socat插件
 CONFIG_PACKAGE_luci-app-socat=y
 # IP限速
