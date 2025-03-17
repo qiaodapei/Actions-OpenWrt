@@ -50,7 +50,7 @@ jobs:
         os: ['ubuntu-22.04'] # 可以添加更多操作系统
         target: [X86, ARMv8] # 使用矩阵来并行化构建不同的目标 
         include:
-          - target: X86-Mini 
+          - target: X86 
             use_ngrok: true
             use_sleep: true
             CONFIG_FILE: X86.config
@@ -59,7 +59,7 @@ jobs:
             FIRMWARE_PATH: openwrt/bin/targets/x86/64/*.img.gz
             FIRMWARE_FILES: |
               openwrt/bin/targets/x86/64/*
-          - target: ARMv8-Mini
+          - target: ARMv8
             use_ngrok: false
             use_sleep: false
             CONFIG_FILE: ARMv8.config
@@ -290,7 +290,7 @@ jobs:
 
     - name: Package Armvirt as OpenWrt
       uses: ophub/flippy-openwrt-actions@main
-      if: ${{ matrix.target == 'ARMv8-Mini' }} 
+      if: ${{ matrix.target == 'ARMv8' }} 
       env:
         OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*.tar.gz
         PACKAGE_SOC: s905d
@@ -303,22 +303,6 @@ jobs:
       with:
         name: OpenWrt_firmware_${{ matrix.target }}_${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
-
-    # - name: 上传x86固件目录
-    #   uses: actions/upload-artifact@main
-    #   if: steps.organize.outputs.status == 'success' && matrix.target == 'X86-Mini' && !cancelled()
-    #   with:
-    #     name: OpenWrt_firmware_${{ matrix.target }}_${{ env.FILE_DATE }}
-    #     path: ${{ env.FIRMWARE }}
-
-    # - name: 上传ARMv8固件目录
-    #   uses: actions/upload-artifact@main
-    #   if: steps.organize.outputs.status == 'success' && matrix.target == 'ARMv8-Mini' && !cancelled()
-    #   with:
-    #     name: OpenWrt_firmware_${{ matrix.target }}_${{ env.FILE_DATE }}
-    #     path: |
-    #         ${{ env.FIRMWARE }}
-    #         ${{ env.PACKAGED_OUTPUTPATH }}
 
     - name: 删除自动发布的旧固件
       uses: dev-drprasad/delete-older-releases@v0.1.0
