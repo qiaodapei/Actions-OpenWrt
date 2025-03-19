@@ -60,6 +60,9 @@ cp -rf ../../kiddin9/luci-app-rtbwmon/* luci-app-rtbwmon
 # poweroff关机插件
 git clone https://github.com/DongyangHu/luci-app-poweroff.git
 
+# 应用过滤(OAF)
+git clone https://github.com/destan19/OpenAppFilter.git
+
 popd
 
 # 添加第三方应用
