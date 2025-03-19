@@ -97,6 +97,8 @@ CONFIG_PACKAGE_luci-app-wifischedule=y
 ###############################################
 # Go WebDAV 应用，提供 WebDAV 服务的 Go 语言实现。
 CONFIG_PACKAGE_luci-app-gowebdav=y
+# 硬盘休眠
+CONFIG_PACKAGE_luci-app-hd-idle=y
 # 文件助手
 CONFIG_PACKAGE_luci-app-fileassistant=y
 ##############################################
