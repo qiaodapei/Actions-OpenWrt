@@ -52,7 +52,7 @@ jobs:
         include:
           - target: X86 
             use_ngrok: true
-            use_sleep: true
+            use_sleep: false
             CONFIG_FILE: X86.config
             DIY_P1_SH: scripts/diy-mini/diy-part1.sh
             DIY_P2_SH: scripts/diy-mini/diy-part2.sh
