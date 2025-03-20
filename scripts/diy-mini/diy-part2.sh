@@ -26,6 +26,25 @@ sed -i "14i uci set network.wan.ifname='eth0'" package/lean/default-settings/fil
 # 修改默认主题
 sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" feeds/luci/collections/luci/Makefile
 sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" feeds/luci/collections/luci-light/Makefile
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 修改固件名称
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 提取主版本号
+VERSION_NUMBER=$(awk -F '[ ,]' '/VERSION_NUMBER:=/ {for(i=1; i<=NF; i++) {if ($i ~ /[0-9]+\.[0-9]+\.[0-9]+/) {gsub(/[^0-9.]/, "", $i); print $i; exit}}}' include/version.mk)
+# 生成日期版本
+DATA_VERSION=$(date +"%Y%m%d%H")
+echo "DATA_VERSION=$(date +"%Y%m%d%H")" >> $GITHUB_ENV
+# 自定义scripts/getver.sh文件
+GETVER=scripts/getver.sh
+cat << EOF > $GETVER
+#!/usr/bin/env bash
+REV=$DATA_VERSION
+echo "\$REV"
+EOF
+sed -i "s|DEVICE_IMG_PREFIX := \$(IMG_PREFIX)-\$(1)|DEVICE_IMG_PREFIX := \$(IMG_PREFIX)-${VERSION_NUMBER}-${DATA_VERSION}-\$(1)|" include/image.mk
+# 后续操作（修改描述等）
+author="Loki"
+sed -i "s/DISTRIB_DESCRIPTION.*/DISTRIB_DESCRIPTION='%D %V %C by ${author}'/g" package/base-files/files/etc/openwrt_release
 
 # rm -rf feeds/packages/lang/golang
 # git clone https://github.com/kenzok8/golang feeds/packages/lang/golang
