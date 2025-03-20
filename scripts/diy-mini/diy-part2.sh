@@ -71,9 +71,11 @@ echo "
 # 系统相关应用
 ###################################################
 CONFIG_PACKAGE_luci-app-poweroff=y
-# CONFIG_PACKAGE_luci-app-guest-wifi=y
-# CONFIG_PACKAGE_luci-app-wolplus=y
+CONFIG_PACKAGE_luci-app-guest-wifi=y
+CONFIG_PACKAGE_luci-app-wolplus=y
 # CONFIG_PACKAGE_luci-app-usb3disable=y
+# Web管理
+CONFIG_PACKAGE_luci-app-webadmin=y
 ################################################
 # 状态相关应用
 ################################################
@@ -101,6 +103,11 @@ CONFIG_PACKAGE_luci-app-gowebdav=y
 CONFIG_PACKAGE_luci-app-hd-idle=y
 # 文件助手
 CONFIG_PACKAGE_luci-app-fileassistant=y
+# 天翼家庭云
+CONFIG_PACKAGE_luci-app-familycloud=y
+# 阿里云盘 WebDAV	
+CONFIG_PACKAGE_luci-app-aliyundrive-webdav=y
+CONFIG_PACKAGE_luci-app-ddnsto=y
 ##############################################
 # 网络相关应用
 ##############################################
