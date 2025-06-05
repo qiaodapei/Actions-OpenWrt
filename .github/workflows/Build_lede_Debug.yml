@@ -201,9 +201,10 @@ jobs:
         CONFIG_FILE_PATH: config/${{ matrix.CONFIG_FILE }}
       run: |
         [ -e files ] && mv files openwrt/files
+        echo $CONFIG_FILE_PATH
         [ -e $CONFIG_FILE_PATH ] && mv $CONFIG_FILE_PATH openwrt/.config
         ls -al openwrt/.config
-        # cat openwrt/.config
+        cat openwrt/.config
         chmod +x ${{ matrix.DIY_P2_SH }}
         cd openwrt
         $GITHUB_WORKSPACE/${{ matrix.DIY_P2_SH }}
