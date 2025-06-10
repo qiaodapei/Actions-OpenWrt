@@ -1,0 +1,28 @@
+name: Build-All
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+    - name: ImmortalWrt 24.10
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        event-type: N1-ImmortalWrt-24.10
+
+    - name: LEDE
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        event-type: N1-LEDE
+
+    - name: OpenWrt 24.10
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        event-type: N1-OpenWrt-24.10
