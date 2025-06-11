@@ -58,11 +58,11 @@ jobs:
 
     - name: Prepare source code
       run: |
-        sudo chown -R runner:runner /home/runner/work/build_openwrt
+        sudo chown -R runner:runner /home/runner/work/Actions-OpenWrt
         echo "build_date=$(date +%Y.%m.%d)" >> ${GITHUB_ENV}
         cp -r ./scripts/openwrt-24.10/. ./
         /bin/bash 01_prepare_source_code.sh
-        ln -sf /home/runner/work/build_openwrt/build_openwrt/openwrt /home/runner/work/_actions/ffuqiangg/amlogic-s9xxx-openwrt/main/openwrt
+        ln -sf /home/runner/work/Actions-OpenWrt/Actions-OpenWrt/openwrt /home/runner/work/_actions/ffuqiangg/amlogic-s9xxx-openwrt/main/openwrt
 
     - name: Prepare package
       working-directory: ${{ github.workspace }}/openwrt
@@ -144,7 +144,7 @@ jobs:
     - name: telegram notification
       if: github.event_name == 'repository_dispatch'
       run: |
-        firmware_num="$(curl -fsSL https://github.com/ffuqiangg/build_openwrt/releases/expanded_assets/${{ env.build_date }} | grep -oE "N1-.*.zip" | sort -u | wc -l)"
+        firmware_num="$(curl -fsSL https://github.com/ffuqiangg/Actions-OpenWrt/releases/expanded_assets/${{ env.build_date }} | grep -oE "N1-.*.zip" | sort -u | wc -l)"
         MSG="
         *${{ env.build_date }}* 固件编译完成
         https://github.com/ffuqiangg/build\_openwrt/releases/tag/${{ env.build_date }}
